@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GPS Tracking Demo</title>
+    <script>
+    var track = {
+      // (A) PROPERTIES
+      map : null, // HTML map
+      delay : 10000, // Delay between location refresh
+
+      // (B) INIT
+      init : function () {
+        track.map = document.getElementById("map");
+        track.show();
+        setInterval(track.show, track.delay);
+      },
+
+      // (C) GET DATA FROM SERVER AND UPDATE MAP
+      show : function () {
+        // (C1) DATA
+        var data = new FormData();
+        data.append('req', 'getAll');
+
+        // (C2) AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', "2b-ajax-track.php");
+        xhr.onload = function () {
+          track.map.innerHTML = "<div>LOADED "+Date.now()+"</div>";
+          var res = JSON.parse(this.response);
+          if (res.status==1) {
+            for (let rider of res.message) {
+              var dummy = document.createElement("div");
+              dummy.innerHTML = "Rider ID " + rider.rider_id + " | Lng " + rider.track_lng + " | Lat " + rider.track_lat + " | Updated " + rider.track_time;
+              track.map.appendChild(dummy);
+            }
+          } else { track.map.innerHTML = res.message; }
+        };
+        xhr.send(data);
+      }
+    };
+    window.addEventListener("DOMContentLoaded", track.init);
+    </script>
+  </head>
+  <body>
+    <div id="map"></div>
+  </body>
+</html>
